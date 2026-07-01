@@ -33,7 +33,7 @@ def check_csv(path: Path, required_columns: list[str], row_count: int | None = N
 
 def main() -> None:
     require(CONTRACT.exists(), f"missing contract: {CONTRACT}")
-    contract = json.loads(CONTRACT.read_text())
+    contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     require(contract.get("schema_version") == 1, "schema_version must be 1")
 
     for name, spec in contract["datasets"].items():
