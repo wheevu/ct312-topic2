@@ -1,6 +1,6 @@
 # CT312 Chủ đề 2 - Website học gom nhóm dữ liệu
 
-Kho này chứa dữ liệu mẫu, kết quả xử lý và ứng dụng Streamlit dùng để trực quan hóa ba giải thuật gom nhóm: **KMeans**, **hierarchical clustering** và **DBSCAN**.
+Repo này chứa dữ liệu mẫu, kết quả xử lý và ứng dụng Streamlit dùng để trực quan hóa ba giải thuật gom nhóm: **KMeans**, **hierarchical clustering** và **DBSCAN**.
 
 ## Nội dung chính
 
@@ -40,15 +40,6 @@ docs/topic2_visualization_contract.json
 app/streamlit_app.py                  # ứng dụng trực quan hóa
 screenshots/                          # ảnh chụp màn hình để gửi nhóm
 ```
-
-## Ảnh chụp nhanh
-
-Các ảnh trong `screenshots/` có thể gửi trực tiếp cho thành viên nhóm:
-
-- `01_tong_quan.png`: bảng chỉ số tổng hợp và mục tiêu từng giải thuật.
-- `02_kmeans_steps.png`: scatter Seeds, kích thước cụm và các bước KMeans.
-- `03_hierarchical_dendrogram.png`: scatter User Knowledge, dendrogram và bảng gộp cụm.
-- `04_dbscan_vs_kmeans.png`: DBSCAN trên Spiral và phần so sánh với KMeans.
 
 ## Bộ dữ liệu được chọn
 
