@@ -1,0 +1,13 @@
+step,action,inertia,changed_assignments,centroid_shift
+1,assign points to nearest centroid,953.651808,,
+1,update centroids from assigned points,953.651808,,2.348948
+2,assign points to nearest centroid,476.455376,28.0,
+2,update centroids from assigned points,476.455376,,0.775878
+3,assign points to nearest centroid,434.417971,6.0,
+3,update centroids from assigned points,434.417971,,0.123746
+4,assign points to nearest centroid,432.431235,5.0,
+4,update centroids from assigned points,432.431235,,0.13268
+5,assign points to nearest centroid,430.877034,1.0,
+5,update centroids from assigned points,430.877034,,0.029202
+6,assign points to nearest centroid,430.816887,0.0,
+6,update centroids from assigned points,430.816887,,0.0

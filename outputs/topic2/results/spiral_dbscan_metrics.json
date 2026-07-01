@@ -1,0 +1,12 @@
+{
+  "algorithm": "dbscan",
+  "eps": 0.3,
+  "min_samples": 5,
+  "n_rows": 312,
+  "n_features": 2,
+  "n_clusters_excluding_noise": 3,
+  "noise_points": 0,
+  "noise_pct": 0.0,
+  "silhouette_excluding_noise": 0.001393007226841032,
+  "adjusted_rand_vs_label": 1.0
+}

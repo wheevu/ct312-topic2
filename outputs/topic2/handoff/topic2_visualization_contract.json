@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "generated_for": "Handoff trực quan hóa cho Chủ đề 2",
+  "coordinate_columns": {
+    "plot_x": "Tọa độ x để vẽ 2D. Nếu dữ liệu có đúng 2 thuộc tính thì đây là x đã chuẩn hóa; nếu nhiều hơn 2 thuộc tính thì là thành phần PCA-1.",
+    "plot_y": "Tọa độ y để vẽ 2D. Nếu dữ liệu có đúng 2 thuộc tính thì đây là y đã chuẩn hóa; nếu nhiều hơn 2 thuộc tính thì là thành phần PCA-2."
+  },
+  "common_point_columns": [
+    "cluster",
+    "plot_x",
+    "plot_y"
+  ],
+  "datasets": {
+    "seeds_kmeans": {
+      "purpose": "Minh họa KMeans: cụm tương đối gọn và phù hợp với centroid",
+      "source_csv": "data/topic2/examples/seeds_kmeans.csv",
+      "generated_from_csv": "data/topic2/examples/seeds_kmeans.csv",
+      "row_count": 210,
+      "feature_columns": [
+        "area",
+        "perimeter",
+        "compactness",
+        "kernel_length",
+        "kernel_width",
+        "asymmetry",
+        "groove_length"
+      ],
+      "label_column_for_evaluation_only": "variety_name",
+      "default_algorithm": "kmeans",
+      "default_parameters": {
+        "k": 3,
+        "scale": "StandardScaler",
+        "impute": "median"
+      },
+      "required_point_columns": [
+        "area",
+        "perimeter",
+        "compactness",
+        "kernel_length",
+        "kernel_width",
+        "asymmetry",
+        "groove_length",
+        "variety",
+        "variety_name",
+        "cluster",
+        "plot_x",
+        "plot_y"
+      ],
+      "centroid_note": "Centroid trong seeds_kmeans_centroids.csv và bảng bước chạy nằm trong không gian đã chuẩn hóa (đầu ra StandardScaler), không phải đơn vị đo gốc.",
+      "extra_artifact_schemas": {
+        "steps_csv": {
+          "columns": [
+            "step",
+            "action",
+            "inertia",
+            "changed_assignments",
+            "centroid_shift"
+          ],
+          "note": "changed_assignments trống ở bước 1 vì chưa có nhãn trước đó; centroid_shift trống ở các dòng gán điểm vào cụm."
+        },
+        "centroids_csv": {
+          "columns": [
+            "step",
+            "cluster",
+            "area",
+            "perimeter",
+            "compactness",
+            "kernel_length",
+            "kernel_width",
+            "asymmetry",
+            "groove_length"
+          ],
+          "note": "Tọa độ centroid nằm trong không gian đã chuẩn hóa. Mỗi dòng là một centroid ở một bước."
+        }
+      },
+      "artifacts": {
+        "points_csv": "outputs/topic2/results/seeds_kmeans_points.csv",
+        "summary_csv": "outputs/topic2/results/seeds_kmeans_cluster_summary.csv",
+        "metrics_json": "outputs/topic2/results/seeds_kmeans_metrics.json",
+        "scatter_png": "outputs/topic2/plots/seeds_kmeans_scatter.png",
+        "cluster_sizes_png": "outputs/topic2/plots/seeds_kmeans_cluster_sizes.png",
+        "steps_csv": "outputs/topic2/results/seeds_kmeans_steps.csv",
+        "centroids_csv": "outputs/topic2/results/seeds_kmeans_centroids.csv"
+      }
+    },
+    "user_knowledge_hierarchical": {
+      "purpose": "Minh họa hierarchical clustering: dễ xem từng bước gộp hồ sơ học tập",
+      "source_csv": "data/topic2/examples/user_knowledge_hierarchical.csv",
+      "generated_from_csv": "data/topic2/examples/user_knowledge_hierarchical_sample90.csv",
+      "row_count": 90,
+      "full_source_row_count": 403,
+      "demo_sample_csv": "data/topic2/examples/user_knowledge_hierarchical_sample90.csv",
+      "feature_columns": [
+        "STG",
+        "SCG",
+        "STR",
+        "LPR",
+        "PEG"
+      ],
+      "label_column_for_evaluation_only": "UNS",
+      "default_algorithm": "hierarchical",
+      "default_parameters": {
+        "k": 4,
+        "linkage": "ward",
+        "scale": "StandardScaler",
+        "impute": "median"
+      },
+      "required_point_columns": [
+        "student_id",
+        "STG",
+        "SCG",
+        "STR",
+        "LPR",
+        "PEG",
+        "UNS",
+        "source_sheet",
+        "cluster",
+        "plot_x",
+        "plot_y"
+      ],
+      "extra_artifact_schemas": {
+        "merges_csv": {
+          "columns": [
+            "step",
+            "left",
+            "right",
+            "distance",
+            "new_cluster_size",
+            "members_preview"
+          ],
+          "note": "left/right hiển thị tối đa 8 student_id đầu tiên mỗi phía. distance là khoảng cách gộp theo linkage. members_preview hiển thị tối đa 12 phần tử đầu của cụm mới."
+        },
+        "distance_preview_csv": {
+          "columns": [
+            "student_id",
+            "S001",
+            "S004",
+            "S006",
+            "S010",
+            "S016",
+            "S019",
+            "S023",
+            "S026",
+            "S031",
+            "S032",
+            "S034",
+            "S040",
+            "S043",
+            "S046",
+            "S047",
+            "S056",
+            "S057",
+            "S058",
+            "S064",
+            "S071",
+            "S073",
+            "S074",
+            "S077",
+            "S078",
+            "S079"
+          ],
+          "note": "25x25 symmetric standardized-Euclidean distance preview. index column is student_id."
+        }
+      },
+      "artifacts": {
+        "points_csv": "outputs/topic2/results/user_knowledge_hierarchical_points.csv",
+        "summary_csv": "outputs/topic2/results/user_knowledge_hierarchical_cluster_summary.csv",
+        "metrics_json": "outputs/topic2/results/user_knowledge_hierarchical_metrics.json",
+        "scatter_png": "outputs/topic2/plots/user_knowledge_hierarchical_scatter.png",
+        "cluster_sizes_png": "outputs/topic2/plots/user_knowledge_hierarchical_cluster_sizes.png",
+        "merges_csv": "outputs/topic2/results/user_knowledge_hierarchical_merges.csv",
+        "distance_preview_csv": "outputs/topic2/results/user_knowledge_distance_matrix_preview.csv",
+        "dendrogram_png": "outputs/topic2/plots/user_knowledge_hierarchical_dendrogram.png"
+      }
+    },
+    "spiral_dbscan": {
+      "purpose": "Minh họa DBSCAN: cụm không lồi và liên thông theo mật độ",
+      "source_csv": "data/topic2/examples/spiral_dbscan.csv",
+      "generated_from_csv": "data/topic2/examples/spiral_dbscan.csv",
+      "row_count": 312,
+      "feature_columns": [
+        "x",
+        "y"
+      ],
+      "label_column_for_evaluation_only": "true_label",
+      "default_algorithm": "dbscan",
+      "default_parameters": {
+        "eps": 0.3,
+        "min_samples": 5,
+        "scale": "StandardScaler",
+        "impute": "median"
+      },
+      "required_point_columns": [
+        "x",
+        "y",
+        "true_label",
+        "cluster",
+        "plot_x",
+        "plot_y",
+        "point_type"
+      ],
+      "metric_note": "Silhouette không phải chỉ số chính cho cụm dạng xoắn vì chỉ số này ưu tiên cụm lồi/gọn. Với demo này, nên dùng ARI với true_label và scatter plot.",
+      "extra_artifact_schemas": {
+        "k_distance_csv": {
+          "columns": [
+            "rank",
+            "k_distance"
+          ],
+          "note": "Các điểm được sắp theo k-distance tăng dần (khoảng cách đến láng giềng thứ 5). Vùng khuỷu là gợi ý tốt để chọn eps."
+        },
+        "kmeans_comparison_points_csv": {
+          "columns": [
+            "x",
+            "y",
+            "true_label",
+            "cluster",
+            "plot_x",
+            "plot_y"
+          ],
+          "note": "KMeans (k=3) chạy trên cùng dữ liệu Spiral. So sánh cluster với true_label để thấy KMeans không phù hợp với cụm không lồi."
+        }
+      },
+      "artifacts": {
+        "points_csv": "outputs/topic2/results/spiral_dbscan_points.csv",
+        "summary_csv": "outputs/topic2/results/spiral_dbscan_cluster_summary.csv",
+        "metrics_json": "outputs/topic2/results/spiral_dbscan_metrics.json",
+        "scatter_png": "outputs/topic2/plots/spiral_dbscan_scatter.png",
+        "cluster_sizes_png": "outputs/topic2/plots/spiral_dbscan_cluster_sizes.png",
+        "k_distance_csv": "outputs/topic2/results/spiral_dbscan_k_distance.csv",
+        "k_distance_png": "outputs/topic2/plots/spiral_dbscan_k_distance.png",
+        "kmeans_comparison_points_csv": "outputs/topic2/results/spiral_kmeans_comparison_points.csv",
+        "kmeans_comparison_png": "outputs/topic2/plots/spiral_kmeans_comparison.png"
+      }
+    }
+  },
+  "metrics_csv": "outputs/topic2/results/topic2_algorithm_metrics.csv",
+  "notes_md": "docs/topic2_dataset_notes.md"
+}

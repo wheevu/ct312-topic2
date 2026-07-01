@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ct312-topic2"
+version = "0.1.0"
+description = "Topic 2 clustering learning data pack for CT312 Data Mining."
+requires-python = ">=3.10"
+dependencies = [
+    "pandas",
+    "scikit-learn",
+    "scipy",
+    "matplotlib",
+    "xlrd",
+    "streamlit",
+    "plotly",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

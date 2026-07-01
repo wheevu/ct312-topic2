@@ -1,0 +1,5 @@
+cluster,cluster_name,n_rows,share_pct,top_true_label,top_true_label_count
+0,cluster 0,32,35.56,Middle,16
+1,cluster 1,28,31.11,Low,9
+2,cluster 2,9,10.0,High,7
+3,cluster 3,21,23.33,Low,12
