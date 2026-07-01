@@ -102,7 +102,7 @@ def metric_frame(records: list[dict]) -> pd.DataFrame:
 
 
 def write_json(path: Path, payload: object) -> None:
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def save_artifacts(prefix: str, result: dict[str, object], *, plot_title: str) -> dict:
