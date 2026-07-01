@@ -23,12 +23,12 @@ st.set_page_config(
 
 @st.cache_data
 def load_json(rel_path: str) -> dict[str, Any]:
-    return json.loads((ROOT / rel_path).read_text())
+    return json.loads((ROOT / rel_path).read_text(encoding="utf-8"))
 
 
 @st.cache_data
 def load_csv(rel_path: str) -> pd.DataFrame:
-    return pd.read_csv(ROOT / rel_path)
+    return pd.read_csv(ROOT / rel_path, encoding="utf-8")
 
 
 def local_path(rel_path: str) -> Path:
