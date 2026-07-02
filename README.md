@@ -29,6 +29,17 @@ python scripts/topic2/02_validate_handoff.py
 streamlit run app/streamlit_app.py
 ```
 
+## Trực Quan Hoá
+
+<p>
+  <img src="screenshots/01_tong_quan.png" alt="Tổng quan" width="49%" />
+  <img src="screenshots/02_kmeans_steps.png" alt="Các bước KMeans" width="49%" />
+</p>
+<p>
+  <img src="screenshots/03_hierarchical_dendrogram.png" alt="Hierarchical dendrogram" width="49%" />
+  <img src="screenshots/04_dbscan_vs_kmeans.png" alt="DBSCAN so với KMeans" width="49%" />
+</p>
+
 ## Cấu trúc quan trọng
 
 ```text
@@ -40,6 +51,50 @@ docs/topic2_visualization_contract.json
 app/streamlit_app.py                  # ứng dụng trực quan hóa
 screenshots/                          # ảnh chụp màn hình để gửi nhóm
 ```
+
+## Khi làm việc nhóm
+
+- Nhánh chính: `main`.
+- Khi làm tính năng mới hoặc sửa lỗi, tạo nhánh riêng từ `main`:
+
+  ```bash
+  git checkout main
+  git pull --rebase origin main
+  git checkout -b ten-tinh-nang
+  ```
+
+  Ví dụ: `feat/web-upload`, `fix/dendrogram-labels`.
+
+- Commit message viết bằng tiếng Anh, theo dạng conventional commit:
+  - `feat: add new feature`
+  - `fix: fix bug`
+  - `docs: update documentation`
+  - `refactor: clean up code without behavior changes`
+- Trước khi mở pull request, rebase nhánh của mình lên `main` mới nhất:
+
+  ```bash
+  git fetch origin
+  git rebase origin/main
+  ```
+
+  Nếu có conflict, sửa conflict rồi chạy:
+
+  ```bash
+  git add <file-da-sua>
+  git rebase --continue
+  ```
+
+  Khi rebase xong, push lại nhánh bằng:
+
+  ```bash
+  git push --force-with-lease
+  ```
+
+  Không dùng `git push --force`.
+
+- Xong nhánh thì tạo pull request vào `main`. Mô tả rõ đã làm gì, càng cụ thể càng tốt.
+- Ít nhất một người khác review rồi mới merge.
+- Không push trực tiếp lên `main`, trừ khi pull request đã được duyệt.
 
 ## Bộ dữ liệu được chọn
 
