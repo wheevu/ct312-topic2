@@ -1,0 +1,10 @@
+pandas
+scikit-learn
+scipy
+matplotlib
+xlrd
+streamlit
+plotly
+
+[dev]
+pytest

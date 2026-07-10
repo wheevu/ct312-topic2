@@ -1,0 +1,11 @@
+  services:
+    nginx:
+      image: nginx:alpine
+      container_name: ct312-topic2-nginx
+      ports:
+        - "80:80"
+      volumes:
+        - ./nignx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
+      restart: no 
