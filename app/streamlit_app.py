@@ -292,22 +292,14 @@ def main() -> None:
 
     page = st.sidebar.radio(
         "Điều hướng",
-        ["Tổng quan", "KMeans", "Hierarchical", "DBSCAN", "Upload", "Files"],
+        ["Tổng quan", "Upload"],
         index=0,
     )
 
     if page == "Tổng quan":
         overview()
-    elif page == "KMeans":
-        kmeans_view()
-    elif page == "Hierarchical":
-        hierarchical_view()
-    elif page == "DBSCAN":
-        dbscan_view()
     elif page == "Upload":
         upload_view()
-    else:
-        raw_files_view()
 
 def _render_upload_header(feature_cols: list[str], label_col: str | None) -> None:
     st.write(f"Cột dùng để gom nhóm: {', '.join(feature_cols)}")
@@ -405,13 +397,24 @@ def _render_upload_dbscan(prepared: object, result: dict[str, object]) -> None:
 
 def upload_view() -> None:
     st.header("Upload dữ liệu")
-    uploaded = st.file_uploader("Chọn file CSV", type=["csv"])
+    uploaded = st.file_uploader("Chọn file CSV và EXCEL", type=["csv","xlsx"])
 
     if uploaded is None:
         return
 
     try:
-        df = pd.read_csv(uploaded)
+        # df = pd.read_csv(uploaded)
+        file_type = Path(uploaded.name).suffix.lower()
+
+        if file_type == ".csv":
+            df = pd.read_csv(uploaded)
+
+        elif file_type == ".xlsx":
+            df = pd.read_excel(uploaded)
+
+        else:
+            st.error("Định dạng file không được hỗ trợ.")
+            return
     except pd.errors.EmptyDataError:
         st.error("Không thể đọc CSV: file không có cột hoặc không có dữ liệu.")
         return
@@ -428,8 +431,19 @@ def upload_view() -> None:
         st.error("File CSV không có dòng dữ liệu. Hãy tải lên file có ít nhất 2 dòng dữ liệu.")
         return
 
-    st.dataframe(df.head(20), use_container_width=True)
+    # st.dataframe(df.head(20), use_container_width=True)
+
+    st.subheader("Xem trước dữ liệu")
+    st.write(f"Kích thước dữ liệu: {df.shape[0]} dòng × {df.shape[1]} cột")
+
+    st.dataframe(
+        df.head(10),
+        use_container_width=True,
+        hide_index=True
+    )
+
     numeric_cols = df.select_dtypes(include="number").columns.tolist()
+
     if not numeric_cols:
         st.error("CSV không có cột số để gom nhóm.")
         st.warning("Các cột văn bản như tên, giới tính hoặc thành phố chưa được mã hóa; hãy chọn hoặc thêm cột số.")
@@ -495,7 +509,7 @@ def upload_view() -> None:
         )
         sampled_df = df.head(int(row_count)).copy()
         st.info(f"Chỉ tính và vẽ trên {len(sampled_df)} dòng đầu tiên trong file upload.")
-        st.dataframe(sampled_df.head(20), use_container_width=True)
+        # st.dataframe(sampled_df.head(20), use_container_width=True)
         k = st.number_input("Số cụm k", min_value=2, value=3, step=1)
         if int(k) > len(sampled_df):
             show_upload_errors([
