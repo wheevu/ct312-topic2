@@ -19,6 +19,46 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 
 
+@dataclass
+class PreprocessingReport:
+    numeric_summary: pd.DataFrame
+    missing_summary: pd.DataFrame
+    scaler_summary: pd.DataFrame
+    use_pca: bool
+
+def preprocessing_report(
+    frame: pd.DataFrame,
+    feature_columns: list[str],
+) -> PreprocessingReport:
+
+    X = frame[feature_columns].apply(pd.to_numeric, errors="coerce")
+
+    # Missing
+    missing = pd.DataFrame({
+        "Missing": X.isna().sum(),
+        "Median": X.median()
+    })
+
+    # Median Imputer
+    imputer = SimpleImputer(strategy="median")
+    X_imp = imputer.fit_transform(X)
+
+    # StandardScaler
+    scaler = StandardScaler()
+    scaler.fit(X_imp)
+
+    scaler_summary = pd.DataFrame({
+        "Mean": scaler.mean_,
+        "Std": scaler.scale_
+    }, index=feature_columns)
+
+    return PreprocessingReport(
+        numeric_summary=X.describe().T,
+        missing_summary=missing,
+        scaler_summary=scaler_summary,
+        use_pca=len(feature_columns) > 2,
+    )
+
 @dataclass(frozen=True)
 class PreparedData:
     frame: pd.DataFrame

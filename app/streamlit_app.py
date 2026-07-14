@@ -12,10 +12,11 @@ from matplotlib import pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
 
 from topic2_clustering.analysis import (
-      prepare_numeric_frame,
-      run_dbscan,
-      run_hierarchical,
-      run_kmeans,
+    prepare_numeric_frame,
+    preprocessing_report,
+    run_dbscan,
+    run_hierarchical,
+    run_kmeans,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -117,6 +118,36 @@ def upload_data_errors(frame: pd.DataFrame, feature_columns: list[str]) -> list[
         )
     return errors
 
+def show_preprocessing(report):
+
+    st.subheader("Các bước tiền xử lý")
+
+    st.markdown("""
+    1. Chuyển dữ liệu sang kiểu số
+
+    2. Kiểm tra giá trị thiếu
+
+    3. Điền Missing bằng Median
+
+    4. Chuẩn hóa bằng StandardScaler
+    
+    5. PCA (nếu số chiều >2)
+    """)
+
+    st.write("### Giá trị thiếu")
+    st.dataframe(report.missing_summary)
+
+    st.write("### Thống kê dữ liệu")
+    st.dataframe(report.numeric_summary)
+
+    st.write("### StandardScaler")
+
+    st.dataframe(report.scaler_summary)
+
+    if report.use_pca:
+        st.success("PCA sẽ được dùng để giảm dữ liệu xuống 2 chiều để trực quan hóa.")
+    else:
+        st.info("Không cần PCA.")
 
 def show_upload_errors(errors: list[str]) -> None:
     st.error("Không thể chạy thuật toán với dữ liệu hiện tại.")
@@ -432,6 +463,8 @@ def upload_view() -> None:
         return
 
     # st.dataframe(df.head(20), use_container_width=True)
+    st.header("Phân tích dữ liệu")
+    st.dataframe(df.dtypes.rename("Kiểu dữ liệu"))
 
     st.subheader("Xem trước dữ liệu")
     st.write(f"Kích thước dữ liệu: {df.shape[0]} dòng × {df.shape[1]} cột")
@@ -457,6 +490,10 @@ def upload_view() -> None:
     if not feature_cols:
         st.error("Chưa chọn cột số để gom nhóm. Hãy chọn ít nhất một cột đặc trưng.")
         return
+
+    report = preprocessing_report(df, feature_cols)
+
+    show_preprocessing(report)
 
     errors = upload_data_errors(df, feature_cols)
     if errors:
