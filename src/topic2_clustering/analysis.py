@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import pdist, squareform
-from sklearn.cluster import DBSCAN, AgglomerativeClustering
+from sklearn.cluster import DBSCAN, AgglomerativeClustering, KMeans
 from sklearn.decomposition import PCA
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import adjusted_rand_score, silhouette_score
@@ -198,6 +198,7 @@ def run_kmeans(prepared: PreparedData, *, k: int = 3) -> dict[str, object]:
         "summary": cluster_summary(labels, true),
         "trace": traced.trace,
         "centroids": traced.centroid_history,
+        "elbow": elbow_table(prepared.X_scaled),
         "metrics": {
             "algorithm": "kmeans",
             "k": k,
@@ -209,6 +210,27 @@ def run_kmeans(prepared: PreparedData, *, k: int = 3) -> dict[str, object]:
         },
     }
 
+
+def elbow_table(X: np.ndarray, max_k: int = 10) -> pd.DataFrame:
+    max_k = min(max_k, len(X) - 1)
+
+    rows = []
+
+    for k in range(2, max_k + 1):
+        model = KMeans(
+            n_clusters=k,
+            random_state=42,
+            n_init=10,
+        )
+
+        model.fit(X)
+
+        rows.append({
+            "k": k,
+            "inertia": model.inertia_,
+        })
+
+    return pd.DataFrame(rows)
 
 def hierarchical_merges(X: np.ndarray, row_labels: list[str], *, method: str = "ward") -> pd.DataFrame:
     Z = linkage(X, method=method)

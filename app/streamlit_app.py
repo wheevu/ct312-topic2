@@ -9,7 +9,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from matplotlib import pyplot as plt
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import dendrogram, fcluster
 
 from topic2_clustering.analysis import (
     prepare_numeric_frame,
@@ -17,6 +17,7 @@ from topic2_clustering.analysis import (
     run_dbscan,
     run_hierarchical,
     run_kmeans,
+    k_distance_table,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -283,9 +284,9 @@ def dbscan_view() -> None:
         st.write("Loại điểm")
         st.dataframe(points["point_type"].value_counts().rename_axis("point_type").reset_index(name="n_rows"), hide_index=True)
 
-    st.subheader("Chọn eps")
-    fig = px.line(kdist, x="rank", y="k_distance", title="Đường k-distance", height=360)
-    st.plotly_chart(fig, use_container_width=True)
+    # st.subheader("Chọn eps")
+    # fig = px.line(kdist, x="rank", y="k_distance", title="Đường k-distance", height=360)
+    # st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("So sánh với KMeans")
     st.write("KMeans chia Spiral theo khoảng cách đến centroid, nên không giữ được hình dạng xoắn của cụm.")
@@ -348,6 +349,7 @@ def _render_upload_kmeans(result: dict[str, object]) -> None:
     summary = result["summary"]
     steps = result["trace"]
     centroids = result["centroids"]
+    elbow = result["elbow"]
 
     left, right = st.columns([2, 1])
     with left:
@@ -357,6 +359,25 @@ def _render_upload_kmeans(result: dict[str, object]) -> None:
         st.dataframe(summary, use_container_width=True, hide_index=True)
 
     st.subheader("Các bước KMeans")
+
+    st.subheader("Tham khảo chọn số cụm bằng Elbow Method")
+
+    fig = px.line(
+        elbow,
+        x="k",
+        y="inertia",
+        markers=True,
+        title="Elbow Method",
+        height=350,
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.caption(
+        "Điểm khuỷu tay là vị trí mà Inertia bắt đầu giảm chậm hơn. "
+        "Giá trị k tại vị trí này thường được chọn làm số cụm ban đầu."
+    )
+
     assign_steps = steps[steps["action"].str.startswith("assign")]
     fig = px.line(assign_steps, x="step", y="inertia", markers=True, title="Inertia qua từng bước gán cụm", height=340)
     st.plotly_chart(fig, use_container_width=True)
@@ -384,8 +405,39 @@ def _render_upload_hierarchical(result: dict[str, object], row_labels: list[str]
         st.dataframe(summary, use_container_width=True, hide_index=True)
 
     st.subheader("Dendrogram")
+    max_cluster = len(points)
+
+    selected_k = st.slider(
+        "Số cụm cần cắt",
+        min_value=2,
+        max_value=max_cluster,
+        value=metrics["k"],
+    )
+
+    n = linkage_matrix.shape[0] + 1
+
+    # linkage có n-1 lần merge
+    # Muốn còn k cụm thì lấy merge thứ n-k
+    cut_height = linkage_matrix[n - selected_k - 1, 2]
+
     fig, ax = plt.subplots(figsize=(10, 4))
     dendrogram(linkage_matrix, labels=row_labels[: len(points)], ax=ax, no_labels=True)
+
+    ax.axhline(
+        y=cut_height,
+        color="red",
+        linestyle="--",
+        linewidth=2,
+    )
+
+    ax.text(
+        0,
+        cut_height,
+        f"k = {selected_k}",
+        color="red",
+        fontsize=10,
+        verticalalignment="bottom",
+    )
     ax.set_ylabel("distance")
     ax.set_xlabel("")
     st.pyplot(fig, use_container_width=True)
@@ -421,10 +473,38 @@ def _render_upload_dbscan(prepared: object, result: dict[str, object]) -> None:
     fig = px.line(kdist, x="rank", y="k_distance", title="Đường k-distance", height=360)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader("So sánh với KMeans")
-    st.write("KMeans chia dữ liệu theo khoảng cách đến centroid, nên thường không giữ tốt cấu trúc không lồi.")
-    scatter(comparison, title="KMeans trên cùng dữ liệu upload", hover_cols=[c for c in ["true_label", "point_type"] if c in comparison.columns])
+    # st.subheader("So sánh với KMeans")
+    # st.write("KMeans chia dữ liệu theo khoảng cách đến centroid, nên thường không giữ tốt cấu trúc không lồi.")
+    # scatter(comparison, title="KMeans trên cùng dữ liệu upload", hover_cols=[c for c in ["true_label", "point_type"] if c in comparison.columns])
 
+    st.subheader("So sánh DBSCAN và KMeans")
+
+    st.write(
+        "DBSCAN giữ được các cụm có hình dạng bất kỳ và phát hiện điểm nhiễu, "
+        "trong khi KMeans chia dữ liệu dựa trên khoảng cách tới centroid."
+    )
+
+    left, right = st.columns(2)
+
+    with left:
+        scatter(
+            points,
+            title="DBSCAN",
+            hover_cols=[
+                c for c in ["true_label", "point_type"]
+                if c in points.columns
+            ],
+        )
+
+    with right:
+        scatter(
+            comparison,
+            title="KMeans",
+            hover_cols=[
+                c for c in ["true_label", "point_type"]
+                if c in comparison.columns
+            ],
+        )
 
 def upload_view() -> None:
     st.header("Upload dữ liệu")
@@ -520,7 +600,24 @@ def upload_view() -> None:
     if algorithm == "KMeans":
         st.header("KMeans — Upload")
         st.caption("Centroid và inertia được tính trên dữ liệu đã chuẩn hóa.")
-        k = st.number_input("Số cụm k", min_value=2, value=3, step=1)
+
+        left, right = st.columns([1, 2])
+
+        with left:
+            k = st.number_input(
+                "Số cụm k",
+                min_value=2,
+                value=3,
+                step=1,
+            )
+
+        with right:
+            st.info(
+                "**Phương pháp Elbow** giúp tham khảo số cụm phù hợp.\n\n"
+                "Quan sát đồ thị Inertia theo k và chọn vị trí "
+                "mà đường cong bắt đầu giảm chậm (điểm khuỷu tay). "
+                "Đây chỉ là gợi ý, bạn vẫn có thể chọn giá trị k khác."
+            )
         if int(k) > len(df):
             show_upload_errors([
                 f"KMeans yêu cầu số cụm k không vượt quá số dòng dữ liệu ({len(df)}), nhưng bạn đã chọn k={int(k)}."
@@ -564,21 +661,78 @@ def upload_view() -> None:
         _render_upload_hierarchical(result, row_labels)
     else:
         st.header("DBSCAN — Upload")
-        st.caption("Silhouette không phải chỉ số chính cho cụm dạng xoắn; nên ưu tiên scatter plot và ARI.")
-        eps = st.number_input("eps", min_value=0.01, value=0.30, step=0.01)
-        min_samples = st.number_input("min_samples", min_value=2, value=5, step=1)
-        if int(min_samples) > len(df):
-            show_upload_errors([
-                f"DBSCAN yêu cầu min_samples không vượt quá số dòng dữ liệu ({len(df)}), nhưng bạn đã chọn min_samples={int(min_samples)}."
-            ])
-            return
+        st.caption(
+            "Silhouette không phải chỉ số chính cho cụm dạng xoắn; "
+            "nên ưu tiên scatter plot và ARI."
+        )
+
         try:
-            prepared = prepare_numeric_frame(df, feature_cols, label_column=label_col)
-            result = run_dbscan(prepared, eps=float(eps), min_samples=int(min_samples))
+            prepared = prepare_numeric_frame(
+            df,
+            feature_cols,
+            label_column=label_col,
+        )
         except (ValueError, TypeError) as error:
-            st.error("Không thể tiền xử lý hoặc chạy DBSCAN với dữ liệu hiện tại.")
+            st.error("Không thể tiền xử lý dữ liệu.")
             st.warning(f"Chi tiết lỗi: {error}")
             return
+
+        st.subheader("Tham khảo chọn eps")
+
+        preview_min_samples = 5
+
+        preview = k_distance_table(
+            prepared.X_scaled,
+            k=preview_min_samples,
+        )
+
+        fig = px.line(
+            preview,
+            x="rank",
+            y="k_distance",
+            markers=True,
+            title="Đường k-distance",
+            height=360,
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.info(
+                "Quan sát điểm chuyển tiếp của đường k-distance. Giá trị k-distance tại vị trí này thường được chọn làm eps."
+        )
+
+        eps = st.number_input(
+            "eps",
+            min_value=0.01,
+            value=0.30,
+            step=0.01,
+        )
+
+        min_samples = st.number_input(
+            "min_samples",
+            min_value=2,
+            value=5,
+            step=1,
+        )
+
+        if int(min_samples) > len(df):
+            show_upload_errors([
+                f"DBSCAN yêu cầu min_samples không vượt quá số dòng dữ liệu ({len(df)}), "
+                f"nhưng bạn đã chọn min_samples={int(min_samples)}."
+            ])
+            return
+
+        try:
+            result = run_dbscan(
+                prepared,
+                eps=float(eps),
+                min_samples=int(min_samples),
+            )
+        except (ValueError, TypeError) as error:
+            st.error("Không thể chạy DBSCAN với dữ liệu hiện tại.")
+            st.warning(f"Chi tiết lỗi: {error}")
+            return
+
         _render_upload_dbscan(prepared, result)
 
 if __name__ == "__main__":
