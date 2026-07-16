@@ -653,7 +653,21 @@ def upload_view() -> None:
         try:
             sampled_prepared = prepare_numeric_frame(sampled_df, feature_cols, label_column=label_col)
             row_labels = [str(i) for i in sampled_df.index]
-            result = run_hierarchical(sampled_prepared, k=int(k), method="ward", row_labels=row_labels)
+
+
+            linkage_method = st.selectbox(
+                "Linkage",
+                ["ward", "complete", "average", "single"],
+                index=0,
+                help="""
+                Ward: giảm phương sai trong cụm (thường dùng với dữ liệu số).
+                Complete: khoảng cách xa nhất.
+                Average: khoảng cách trung bình.
+                Single: khoảng cách gần nhất.
+                """
+            )
+
+            result = run_hierarchical(sampled_prepared, k=int(k), method=linkage_method, row_labels=row_labels)
         except (ValueError, TypeError) as error:
             st.error("Không thể tiền xử lý hoặc chạy Hierarchical clustering với dữ liệu hiện tại.")
             st.warning(f"Chi tiết lỗi: {error}")
